@@ -1,0 +1,155 @@
+name: Performance Tests
+
+on:
+  # Ejecutar en push a main
+  push:
+    branches: [ main ]
+
+  # Ejecutar en Pull Requests
+  pull_request:
+    branches: [ main ]
+
+  # Permitir ejecución manual
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to test'
+        required: true
+        default: 'walmart-sanity'
+        type: choice
+        options:
+          - walmart-sanity
+          - walmart
+          - walmart-load
+          - demo-sanity
+          - demo
+          - reqres-sanity
+          - reqres
+      users:
+        description: 'Number of users'
+        required: false
+        default: '1'
+      debug:
+        description: 'Enable debug mode'
+        required: false
+        default: 'false'
+        type: boolean
+
+jobs:
+  sanity-check:
+    name: Sanity Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Run Walmart Sanity Test
+        env:
+          ENV: walmart-sanity
+          DEBUG: false
+        run: |
+          mvn clean test-compile
+          mvn gatling:test -Dgatling.simulationClass=simulations.WalmartSanitySimulation
+
+      - name: Upload Gatling Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gatling-sanity-report
+          path: target/gatling/
+          retention-days: 30
+
+      - name: Check test results
+        if: failure()
+        run: |
+          echo "❌ Sanity tests failed!"
+          echo "Check the uploaded artifacts for detailed reports"
+          exit 1
+
+  load-test:
+    name: Load Test (Manual or Scheduled)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Run Performance Test
+        env:
+          ENV: ${{ github.event.inputs.environment || 'walmart' }}
+          DEBUG: ${{ github.event.inputs.debug || 'false' }}
+          USERS: ${{ github.event.inputs.users || '10' }}
+        run: |
+          echo "🚀 Running performance test"
+          echo "Environment: $ENV"
+          echo "Users: $USERS"
+          echo "Debug: $DEBUG"
+          mvn clean test-compile
+          mvn gatling:test -Dgatling.simulationClass=simulations.WalmartSimulation
+
+      - name: Upload Gatling Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gatling-load-report-${{ github.event.inputs.environment }}
+          path: target/gatling/
+          retention-days: 30
+
+      - name: Performance Test Summary
+        if: always()
+        run: |
+          echo "## 📊 Performance Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment:** ${{ github.event.inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Users:** ${{ github.event.inputs.users }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status:** ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📄 Check artifacts for detailed HTML reports" >> $GITHUB_STEP_SUMMARY
+
+  demo-api-test:
+    name: Demo API Sanity
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Run Demo API Sanity Test
+        env:
+          ENV: demo-sanity
+          DEBUG: false
+        run: |
+          mvn clean test-compile
+          mvn gatling:test -Dgatling.simulationClass=simulations.DemoSanitySimulation
+
+      - name: Upload Gatling Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gatling-demo-sanity-report
+          path: target/gatling/
+          retention-days: 30
