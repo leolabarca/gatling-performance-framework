@@ -7,7 +7,7 @@ object DataFeeders {  // ← Cambia aquí de DataFeeders2 a DataFeeders
 
   // ===== CSV Feeders =====
 
-  val walmartCredentialsFeeder = csv("data/walmart-credentials.csv").circular
+  val walmartCredentialsFeeder = csv("data/credentials.csv").circular
   val usersFeeder = csv("data/users.csv").circular
   val usersFeederRandom = csv("data/users.csv").random
   val productsFeeder = csv("data/products.csv").circular
