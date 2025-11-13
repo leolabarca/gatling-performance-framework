@@ -33,7 +33,7 @@ object WalmartAuthScenario {
       )
       .exec { session =>
         println("=" * 80)
-        println(s"🔐 LOGIN RESPONSE for user: ${session("username").as[String]}")
+        println(s"🔐 LOGIN RESPONSES for user: ${session("username").as[String]}")
         println(session("loginResponse").asOption[String].getOrElse("No response body"))
         println(s"🔑 Token extraído: ${session("authToken").asOption[String].getOrElse("No token found")}")
         println("=" * 80)
