@@ -1,0 +1,84 @@
+# ===================================
+# Gatling Performance Framework
+# .gitignore
+# ===================================
+
+# ===== Maven =====
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# ===== Gatling Reports =====
+results/
+target/gatling/
+*.log
+
+# ===== IntelliJ IDEA =====
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+.idea_modules/
+
+# ===== Eclipse =====
+.classpath
+.project
+.settings/
+bin/
+
+# ===== VS Code =====
+.vscode/
+*.code-workspace
+
+# ===== Scala/SBT =====
+.cache
+.history
+.lib/
+dist/*
+lib_managed/
+src_managed/
+project/boot/
+project/plugins/project/
+.scala_dependencies
+.worksheet
+
+# ===== OS Files =====
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*~
+
+# ===== Logs =====
+*.log
+logs/
+gatling-debug.log
+
+# ===== Credentials (IMPORTANTE) =====
+*.env
+.env.local
+.env.*.local
+secrets/
+credentials.conf
+
+# ===== Temporary files =====
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# ===== Test data (si contiene datos sensibles) =====
+# data/*.csv
+# Descomenta si tus CSVs tienen datos sensibles
