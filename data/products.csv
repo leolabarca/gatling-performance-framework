@@ -1,0 +1,11 @@
+productId,productName,category,price,quantity
+P001,Laptop Dell XPS 13,Electronics,1299.99,5
+P002,iPhone 14 Pro,Electronics,999.99,3
+P003,Samsung Galaxy S23,Electronics,899.99,2
+P004,Sony WH-1000XM5,Electronics,399.99,1
+P005,iPad Pro 12.9,Electronics,1099.99,2
+P006,MacBook Pro 16,Electronics,2499.99,1
+P007,AirPods Pro,Electronics,249.99,4
+P008,Kindle Paperwhite,Electronics,139.99,2
+P009,Apple Watch Series 8,Electronics,399.99,1
+P010,Nintendo Switch,Electronics,299.99,3

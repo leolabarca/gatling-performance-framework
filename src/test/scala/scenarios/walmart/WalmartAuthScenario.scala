@@ -1,24 +1,31 @@
 package scenarios.walmart
 
-import config.BaseConfig
+import utils.{DebugUtils, DataFeeders}
 import io.gatling.core.Predef._
 import io.gatling.http.Predef._
-import utils.DebugUtils
+import config.BaseConfig
 
 object WalmartAuthScenario {
 
-  // Autenticación con credenciales del config
+  // Autenticación usando datos del CSV feeder
   val authenticate =
-    DebugUtils.logRequest("LOGIN")
+    feed(DataFeeders.walmartCredentialsFeeder) // ← Carga username/password del CSV
+      .exec(DebugUtils.logRequest("LOGIN"))
+      .exec { session =>
+        println(s"[FEEDER] Using credentials from CSV:")
+        println(s"  Username: ${session("username").as[String]}")
+        println(s"  Password: ${session("password").as[String]}")
+        session
+      }
       .exec(
         http("LOGIN")
           .post("/api/auth")
           .headers(BaseConfig.commonHeaders)
           .body(StringBody(
-            s"""{
-               |  "username": "${BaseConfig.username}",
-               |  "password": "${BaseConfig.password}"
-               |}""".stripMargin
+            """{
+              |  "username": "#{username}",
+              |  "password": "#{password}"
+              |}""".stripMargin
           ))
           .check(status.is(200))
           .check(jsonPath("$.data.token").saveAs("authToken"))
@@ -26,7 +33,7 @@ object WalmartAuthScenario {
       )
       .exec { session =>
         println("=" * 80)
-        println("🔐 LOGIN RESPONSE:")
+        println(s"🔐 LOGIN RESPONSE for user: ${session("username").as[String]}")
         println(session("loginResponse").asOption[String].getOrElse("No response body"))
         println(s"🔑 Token extraído: ${session("authToken").asOption[String].getOrElse("No token found")}")
         println("=" * 80)
@@ -34,7 +41,7 @@ object WalmartAuthScenario {
       }
       .exec(DebugUtils.logResponse)
 
-  // Escenario completo de autenticación
+  // Escenario completo de autenticación (data-driven)
   val scn = scenario("Walmart Authentication")
     .exec(authenticate)
 }
