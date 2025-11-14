@@ -38,7 +38,7 @@ class WalmartSanitySimulation extends Simulation {
 
   after {
     println("=" * 50)
-    println("🔍 Sanity Check completed!")
+    println("🔍 Sanity Check completeed!")
     println("=" * 50)
   }
 }

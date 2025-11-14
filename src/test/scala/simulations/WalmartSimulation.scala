@@ -2,43 +2,52 @@ package simulations
 
 import io.gatling.core.Predef._
 import io.gatling.http.Predef._
-import scenarios.walmart.WalmartProductsScenario  // ← Actualizar import
+import scenarios.walmart.WalmartProductsScenario
 import config.BaseConfig
 import scala.concurrent.duration._
 
 class WalmartSimulation extends Simulation {
 
-  // Imprimir configuración al inicio
+  // ================================
+  // HTTP Protocol
+  // ================================
+  val httpProtocol = http
+    .baseUrl(BaseConfig.baseUrl)
+    .headers(BaseConfig.commonHeaders)
+
+  // ================================
+  // PRE — Antes de ejecutar
+  // ================================
   before {
-    println("\n🏪 WALMART PERFORMANCE TEST")
+    println("\n🏪 WALMART PERFORMANCE TEST — Distributed Mode")
     BaseConfig.printConfig()
   }
 
-  // Configuración del protocolo HTTP
-  val httpProtocol = http
-    .baseUrl(BaseConfig.baseUrl)
-    .acceptHeader("application/json")
-    .contentTypeHeader("application/json")
-    .userAgentHeader("Gatling-Performance-Framework/1.0")
-    .shareConnections
-
-  // Setup de la simulación
+  // ================================
+  // SETUP — Inyección distribuida
+  // ================================
   setUp(
     WalmartProductsScenario.scn.inject(
-      rampUsers(BaseConfig.users).during(BaseConfig.rampUp.seconds)
-    ).protocols(httpProtocol)
+      rampUsers(BaseConfig.usersForThisShard)
+        .during(BaseConfig.rampUp.seconds)
+    )
   )
+    .protocols(httpProtocol)
     .maxDuration(BaseConfig.duration.seconds)
     .assertions(
-      global.responseTime.max.lt(5000),
-      global.successfulRequests.percent.gt(95)
+      global.responseTime.percentile3.lt(BaseConfig.p95Threshold),  // P95 threshold
+      global.responseTime.percentile4.lt(BaseConfig.p99Threshold),  // P99 threshold
+      global.successfulRequests.percent.gt(BaseConfig.successRate)  // Success rate
     )
 
-  // Hook después de la simulación
+  // ================================
+  // POST — Después de la prueba
+  // ================================
   after {
-    println("=" * 50)
-    println("🏪 Walmart Simulation completed!")
-    println("Check the HTML report for detailed results")
-    println("=" * 50)
+    println("=" * 60)
+    println("🏁 Walmart Simulation completeeeeeed!")
+    println("📝 Revisa el HTML report (simulación + shard aplicado)")
+    println("=" * 60)
   }
+
 }
