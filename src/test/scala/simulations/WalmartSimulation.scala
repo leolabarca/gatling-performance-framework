@@ -45,7 +45,7 @@ class WalmartSimulation extends Simulation {
   // ================================
   after {
     println("=" * 60)
-    println("🏁 Walmart Simulation completeeeeeed!")
+    println("🏁 Walmart Simulation completeeeeeeed!")
     println("📝 Revisa el HTML report (simulación + shard aplicado)")
     println("=" * 60)
   }
